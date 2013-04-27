@@ -2,13 +2,21 @@ import Data.Graph
 import System.IO
 import Data.List.Split
 
-newGraph p = buildG (0, p) []
+newGraph :: (Graph, Vertex -> (String, String, [String]), String -> Maybe Vertex)
+newGraph = graphFromEdges []
 
-addEdge g v1 v2 = buildG (0, p) ((v1,v2):(v2,v1):(edges g))
-    where p = length (vertices g)
+getEdges (g, _, _) = edges g
+nodes (g, vfn, _) = map vfn (vertices g)
 
-getEdges = edges 
-
+addEdge (g, vfn, kfn) k1 k2 = graphFromEdges (n1:n2:old)
+    where
+        getOrCreateNode key | kfn key == Nothing = (key,key,[])
+                            | otherwise = vfn ((\(Just x) -> x) (kfn key))
+        (v1n, v1k, v1e) = getOrCreateNode k1
+        (v2n, v2k, v2e) = getOrCreateNode k2
+        n1 = (v1n, v1k, v2k:v1e)
+        n2 = (v2n, v2k, v1k:v2e)
+        old = filter (\(_,k,_) -> k /= v1k && k /= v2k) (nodes (g, vfn, kfn))
 
 readGraphFile path = do
     contents <- readFile path
