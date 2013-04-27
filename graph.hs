@@ -1,6 +1,7 @@
 import Data.Graph
 import System.IO
-import Data.List.Split
+import Data.List.Split (splitOn, endBy)
+import Data.Maybe (fromJust)
 
 newGraph :: (Graph, Vertex -> (String, String, [String]), String -> Maybe Vertex)
 newGraph = graphFromEdges []
@@ -11,7 +12,7 @@ nodes (g, vfn, _) = map vfn (vertices g)
 addEdge (g, vfn, kfn) k1 k2 = graphFromEdges (n1:n2:old)
     where
         getOrCreateNode key | kfn key == Nothing = (key,key,[])
-                            | otherwise = vfn ((\(Just x) -> x) (kfn key))
+                            | otherwise = vfn (fromJust (kfn key))
         (v1n, v1k, v1e) = getOrCreateNode k1
         (v2n, v2k, v2e) = getOrCreateNode k2
         n1 = (v1n, v1k, v2k:v1e)
