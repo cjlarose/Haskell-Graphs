@@ -1,3 +1,8 @@
+module Graph (
+    graphFromEdgeList,
+    graphFromMap,
+    readGraphFile
+) where
 import Data.Graph
 import System.IO
 import Data.List.Split (splitOn, endBy)
@@ -5,8 +10,10 @@ import Data.Maybe (fromJust)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 
+type LabeledGraph = (Graph, Vertex -> (String, String, [String]), String -> Maybe Vertex)
+
 {--
-newGraph :: (Graph, Vertex -> (String, String, [String]), String -> Maybe Vertex)
+newGraph :: LabeledGraph
 newGraph = graphFromEdges []
 
 getEdges (g, _, _) = edges g
@@ -23,6 +30,7 @@ addEdge (g, vfn, kfn) k1 k2 = graphFromEdges (n1:n2:old)
         old = filter (\(_,k,_) -> k /= v1k && k /= v2k) (nodes (g, vfn, kfn))
 --}
 
+graphFromEdgeList :: [(String, String)] -> LabeledGraph
 graphFromEdgeList edges = graphFromMap (Map.union map1 map2)
     where 
         edge_list = map (\(a, b) -> (a, [b])) edges
