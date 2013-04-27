@@ -5,6 +5,7 @@ import Data.Maybe (fromJust)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 
+{--
 newGraph :: (Graph, Vertex -> (String, String, [String]), String -> Maybe Vertex)
 newGraph = graphFromEdges []
 
@@ -20,6 +21,7 @@ addEdge (g, vfn, kfn) k1 k2 = graphFromEdges (n1:n2:old)
         n1 = (v1n, v1k, v2k:v1e)
         n2 = (v2n, v2k, v1k:v2e)
         old = filter (\(_,k,_) -> k /= v1k && k /= v2k) (nodes (g, vfn, kfn))
+--}
 
 graphFromEdgeList edges = graphFromMap (Map.union map1 map2)
     where 
