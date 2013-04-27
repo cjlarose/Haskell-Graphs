@@ -7,8 +7,8 @@ module GraphGen (
 ) where
 import Graph (graphFromEdgeList)
 
-list = graphFromEdgeList []
-cycle' = graphFromEdgeList []
-star = graphFromEdgeList []
-complete = graphFromEdgeList []
-binaryTree = graphFromEdgeList []
+list n = graphFromEdgeList []
+cycle' n = graphFromEdgeList []
+star n = graphFromEdgeList []
+complete n = graphFromEdgeList []
+binaryTree n = graphFromEdgeList []
