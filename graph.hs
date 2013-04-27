@@ -3,14 +3,14 @@ module Graph (
     graphFromMap,
     readGraphFile
 ) where
-import Data.Graph
+import qualified Data.Graph as Graph
 import System.IO
 import Data.List.Split (splitOn, endBy)
 import Data.Maybe (fromJust)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 
-type LabeledGraph = (Graph, Vertex -> (String, String, [String]), String -> Maybe Vertex)
+type LabeledGraph = (Graph.Graph, Graph.Vertex -> (String, String, [String]), String -> Maybe Graph.Vertex)
 
 {--
 newGraph :: LabeledGraph
@@ -39,7 +39,7 @@ graphFromEdgeList edges = graphFromMap (Map.union map1 map2)
         orphan_edges = map (\x -> (x, [])) (Set.toList orphans)
         map2 = Map.fromList orphan_edges
 
-graphFromMap m = graphFromEdges (map (\(k,v) -> (k,k,v)) (Map.toList m))
+graphFromMap m = Graph.graphFromEdges (map (\(k,v) -> (k,k,v)) (Map.toList m))
 
 readGraphFile path = do
     contents <- readFile path
