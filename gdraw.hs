@@ -12,50 +12,61 @@ tweak = 5
 
 kfun :: Floating a => Graph.Graph -> Int -> Int -> a
 kfun g w l = (sqrt (x/y)) * (fromIntegral tweak)
-    where x = fromIntegral (w*l)
-          y = fromIntegral (length (Graph.vertices g))
+  where 
+    x = fromIntegral (w*l)
+    y = fromIntegral (length (Graph.vertices g))
 
 fa :: Floating a => Graph.Graph -> Int -> Int -> a -> a
 fa g w l z = (z^2) / k
-    where k = kfun g w l
+  where 
+    k = kfun g w l
 
 fr :: Floating a => Graph.Graph -> Int -> Int -> a -> a
 fr g w l z = (k^2) / z
-    where k = kfun g w l
+  where 
+    k = kfun g w l
 
 disp' f vpos upos = Point.scale delta ((f norm) / norm)
-  where delta = Point.sub vpos upos
-        norm = max (Point.normal delta) 0.01
+  where 
+    delta = Point.sub vpos upos
+    norm = max (Point.normal delta) 0.01
 
 repulsiveForce :: (Ord a, Floating a) => Graph.Graph -> [(a,a)] -> Int -> Int -> [(a,a)]
 repulsiveForce g ps w l = map disp vs
-    where vs = zip (Graph.vertices g) ps
-          disp (v,vpos) = Point.sum [disp' f vpos upos | (u,upos) <- vs, u /= v]
-          f norm = fr g w l norm
+  where 
+    vs = zip (Graph.vertices g) ps
+    disp (v,vpos) = Point.sum [disp' f vpos upos | (u,upos) <- vs, u /= v]
+    f norm = fr g w l norm
 
 edgeMap g = Map.fromListWith (++) edge_list
-    where edge_list = map (\(a,b) -> (a,[b])) (Graph.edges g)
+  where 
+    edge_list = map (\(a,b) -> (a,[b])) (Graph.edges g)
 
 edgeMapRev g = Map.fromListWith (++) edge_list
-    where edge_list = map ((\(a,b) -> (a,[b])).(\(a,b) -> (b,a))) (Graph.edges g)
+  where 
+    edge_list = map ((\(a,b) -> (a,[b])).(\(a,b) -> (b,a))) (Graph.edges g)
 
 attractiveForce :: (Ord a, Floating a) => Graph.Graph -> [(a,a)] -> Int -> Int -> [(a,a)]
 attractiveForce g ps w l = map disp vs
-    where vs = zip (Graph.vertices g) ps
-          e = edgeMap g
-          e' = edgeMapRev g
-          adjacent v m | Map.lookup v m == Nothing = []
-                       | otherwise = map (\x -> (x, ps !! x)) (fromJust (Map.lookup v m))
-          adjacentFrom v = adjacent v e
-          adjacentTo v = adjacent v e'
-          disp v = Point.sub (sumv adjacentTo v) (sumv adjacentFrom v)
-          f norm = fa g w l norm
-          sumv fn (v,vpos) = Point.sum [disp' f vpos upos | (u,upos) <- fn v]
+  where 
+    vs = zip (Graph.vertices g) ps
+    e = edgeMap g
+    e' = edgeMapRev g
+    adjacent v m 
+        | Map.lookup v m == Nothing = []
+        | otherwise = map (\x -> (x, ps !! x)) (fromJust (Map.lookup v m))
+    adjacentFrom v = adjacent v e
+    adjacentTo v = adjacent v e'
+    disp v = Point.sub (sumv adjacentTo v) (sumv adjacentFrom v)
+    f norm = fa g w l norm
+    sumv fn (v,vpos) = Point.sum [disp' f vpos upos | (u,upos) <- fn v]
 
 positionNodes :: (Ord a, Floating a) => Graph.Graph -> [(a,a)] -> [(a,a)] -> [(a,a)] -> Int -> Int -> a -> [(a,a)]
 positionNodes g pos rdisp adisp w l temp = zipWith3 repo pos rdisp adisp
-    where repo vpos r a = fitInCanvas (Point.add vpos (Point.scale dispv (temp/(Point.normal dispv))))
-            where dispv = Point.add r a
-          fitInCanvas (x,y) = (min (w'/2) (max (-w'/2) x), min (l'/2) (max (-l'/2) y))
-            where w' = fromIntegral w
-                  l' = fromIntegral l
+  where 
+    repo vpos r a = fitInCanvas (Point.add vpos (Point.scale dispv (temp/(Point.normal dispv))))
+      where 
+        dispv = Point.add r a
+    fitInCanvas (x,y) = (min (w'/2) (max (-w'/2) x), min (l'/2) (max (-l'/2) y))
+    w' = fromIntegral w
+    l' = fromIntegral l
