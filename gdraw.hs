@@ -14,6 +14,7 @@ kfun g w l = (sqrt (x/y)) * (fromIntegral tweak)
     where x = fromIntegral (w*l)
           y = fromIntegral (length (Graph.vertices g))
 
+fa :: Floating a => Graph.Graph -> Int -> Int -> a -> a
 fa g w l z = (z^2) / k
     where k = kfun g w l
 
@@ -46,7 +47,6 @@ attractiveForce g ps w l = map disp vs
                        | otherwise = map (\x -> (x, ps !! x)) (fromJust (Map.lookup v m))
           adjacentFrom v = adjacent v e
           adjacentTo v = adjacent v e'
-          disp v = Point.sub (sumIn v) (sumOut v)
+          disp v = Point.sub (sumv adjacentTo v) (sumv adjacentFrom v)
           f norm = fa g w l norm
-          sumIn (v,vpos) = Point.sum [disp' f vpos upos | (u,upos) <- adjacentTo v]
-          sumOut (v,vpos) = Point.sum [disp' f vpos upos | (u,upos) <- adjacentFrom v]
+          sumv fn (v,vpos) = Point.sum [disp' f vpos upos | (u,upos) <- fn v]
