@@ -1,0 +1,4 @@
+cabal update
+cabal install cabal-install
+cabal install OpenGL
+cabal install GLFW
