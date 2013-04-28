@@ -1,0 +1,5 @@
+USER Alice
+USER Bob
+USER Charlie
+KNOWS Alice Bob
+KNOWS Alice Charlie

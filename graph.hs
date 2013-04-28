@@ -2,6 +2,7 @@ module Graph (
     graphFromEdgeList,
     graphFromMap,
     readGraphFile,
+    readSocialGraphFile,
 ) where
 import qualified Data.Graph as Graph
 import System.IO
@@ -52,4 +53,17 @@ readGraphFile path = do
     let edge_lines = tail lines
     let edge_list = map ((\[a,b] -> (a,b)).(splitOn " ")) edge_lines
     let graph = graphFromEdgeList edge_list
+    return graph
+
+readEdges xs ("USER":ls) = xs
+readEdges xs ("KNOWS":u:v:[]) = (u,v):xs
+readEdges xs _ = error "Invalid input"
+
+readSocialGraphFile path = do
+    contents <- readFile path
+    let lines = endBy "\n" contents
+    let edges = foldl readEdges [] (map (splitOn " ") lines)
+    let reverse_edges = map (\(u,v) -> (v,u)) edges
+    let (graph, f1, f2) = graphFromEdgeList (edges ++ reverse_edges)
+    putStrLn (show (Graph.edges graph))
     return graph
