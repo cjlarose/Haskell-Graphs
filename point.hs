@@ -3,7 +3,7 @@ module Point (
     min',
     add,
     sub,
-    mul_by_constant,
+    scale,
     Point.sum,
 ) where
 
@@ -15,7 +15,7 @@ min' (ax,ay) (bx,by) | ax < bx = (ax,ay)
 
 add (ax,ay) (bx,by) = (ax+bx, ay+by)
 sub (ax,ay) (bx,by) = (ax-bx, ay-by)
-mul_by_constant (x,y) c = (c * x, c * y)
+scale (x,y) c = (c * x, c * y)
 
 {--sum = foldl Point.add (0,0)--}
 sum ps = (Prelude.sum (map fst ps), Prelude.sum (map snd ps))
