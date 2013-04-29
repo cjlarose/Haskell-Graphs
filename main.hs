@@ -10,7 +10,7 @@ parse ["-h"] = usage >> exit
 --parse (num:f1:f2:[]) = visualize (read num :: Int) f1 f2 >> exit
 --parse _ = usage >> exit
 parse _ = Draw.initWindow graph 640 480 20 0
-    where (graph, a , b) = GraphGen.list 15
+    where (graph, a , b) = GraphGen.cycle 15
 
 usage   = mapM_ putStrLn usageStrings
 
