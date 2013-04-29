@@ -1,12 +1,13 @@
 import System.Environment
 import System.Exit
+import qualified Draw
 
 main = getArgs >>= parse
 
 parse ["-h"] = usage >> exit
 --parse ("-f":num:f1:f2:[]) = visualize' (read num :: Int) f1 f2 >> exit
 --parse (num:f1:f2:[]) = visualize (read num :: Int) f1 f2 >> exit
-parse _ = usage >> exit
+parse _ = Draw.initWindow
 
 usage   = mapM_ putStrLn
     ["-h           : Print help and exit.",
