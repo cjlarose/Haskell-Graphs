@@ -10,35 +10,33 @@ import qualified Data.List as List
 import Data.Maybe (fromJust)
 import qualified Point
 
-tweak = 5
-
-kfun :: Floating a => Graph.Graph -> Int -> Int -> a
-kfun g w l = (sqrt (x/y)) * (fromIntegral tweak)
+kfun :: Floating a => Graph.Graph -> Int -> Int -> a -> a
+kfun g w l tweak = (sqrt (x/y)) * tweak
   where 
     x = fromIntegral (w*l)
     y = fromIntegral (length (Graph.vertices g))
 
-fa :: Floating a => Graph.Graph -> Int -> Int -> a -> a
-fa g w l z = (z^2) / k
+fa :: Floating a => Graph.Graph -> Int -> Int -> a -> a -> a
+fa g w l z tweak = (z^2) / k
   where 
-    k = kfun g w l
+    k = kfun g w l tweak
 
-fr :: Floating a => Graph.Graph -> Int -> Int -> a -> a
-fr g w l z = (k^2) / z
+fr :: Floating a => Graph.Graph -> Int -> Int -> a -> a -> a
+fr g w l z tweak = (k^2) / z
   where 
-    k = kfun g w l
+    k = kfun g w l tweak
 
 disp' f vpos upos = Point.scale delta ((f norm) / norm)
   where 
     delta = Point.sub vpos upos
     norm = max (Point.normal delta) 0.01
 
-repulsiveForce :: (Ord a, Floating a) => Graph.Graph -> [(a,a)] -> Int -> Int -> [(a,a)]
-repulsiveForce g ps w l = map disp vs
+repulsiveForce :: (Ord a, Floating a) => Graph.Graph -> [(a,a)] -> Int -> Int -> a -> [(a,a)]
+repulsiveForce g ps w l tweak = map disp vs
   where 
     vs = zip (Graph.vertices g) ps
     disp (v,vpos) = Point.sum [disp' f vpos upos | (u,upos) <- vs, u /= v]
-    f norm = fr g w l norm
+    f norm = fr g w l norm tweak
 
 edgeMap g = Map.fromListWith (++) edge_list
   where 
@@ -48,8 +46,8 @@ edgeMapRev g = Map.fromListWith (++) edge_list
   where 
     edge_list = map ((\(a,b) -> (a,[b])).(\(a,b) -> (b,a))) (Graph.edges g)
 
-attractiveForce :: (Ord a, Floating a) => Graph.Graph -> [(a,a)] -> Int -> Int -> [(a,a)]
-attractiveForce g ps w l = map disp vs
+attractiveForce :: (Ord a, Floating a) => Graph.Graph -> [(a,a)] -> Int -> Int -> a -> [(a,a)]
+attractiveForce g ps w l tweak = map disp vs
   where 
     vs = zip (Graph.vertices g) ps
     e = edgeMap g
@@ -60,7 +58,7 @@ attractiveForce g ps w l = map disp vs
     adjacentFrom v = adjacent v e
     adjacentTo v = adjacent v e'
     disp v = Point.sub (sumv adjacentTo v) (sumv adjacentFrom v)
-    f norm = fa g w l norm
+    f norm = fa g w l norm tweak
     sumv fn (v,vpos) = Point.sum [disp' f vpos upos | (u,upos) <- fn v]
 
 positionNodes :: (Ord a, Floating a) => Graph.Graph -> [(a,a)] -> [(a,a)] -> [(a,a)] -> Int -> Int -> a -> [(a,a)]
@@ -84,4 +82,17 @@ randomPos p w l = do
     let ps = zipWith (\x y -> (x `mod` w, y `mod` l)) l1 l2
     return ps
 
-{--gdraw :: Grpah.Graph -> Int -> Int -> Int -> a -> Int -> [(a,a)]--}
+temperatures :: (Floating a) => Int -> Int -> [a]
+temperatures init len = map f [0..len-1]
+  where
+    k = (fromIntegral init) / (fromIntegral len)
+    f x = (fromIntegral init) - ((fromIntegral x) * k)
+
+{--
+allPositions g w l iters tweak = foldl f initialPositions temps
+  where
+    initialPositions = randomPos (length (Graph.vertices g)) w l
+    temps = temperatures ((fromIntegreal w) / 10) iters
+gdraw :: (Floating a) => Graph.Graph -> Int -> Int -> Int -> a -> [[(a,a)]]
+gdraw g w l iters tweak = 
+--}
