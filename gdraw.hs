@@ -13,47 +13,47 @@ import qualified Point
 
 kfun :: Floating a => Graph.Graph -> Int -> Int -> a -> a
 kfun g w l tweak = (sqrt (x/y)) * tweak
-  where 
+  where
     x = fromIntegral (w*l)
     y = fromIntegral (length (Graph.vertices g))
 
 fa :: Floating a => Graph.Graph -> Int -> Int -> a -> a -> a
 fa g w l z tweak = (z^2) / k
-  where 
+  where
     k = kfun g w l tweak
 
 fr :: Floating a => Graph.Graph -> Int -> Int -> a -> a -> a
 fr g w l z tweak = (k^2) / z
-  where 
+  where
     k = kfun g w l tweak
 
 disp' f vpos upos = Point.scale delta ((f norm) / norm)
-  where 
+  where
     delta = Point.sub vpos upos
     norm = max (Point.normal delta) 0.01
 
 repulsiveForce :: (Ord a, Floating a) => Graph.Graph -> [(a,a)] -> Int -> Int -> a -> [(a,a)]
 repulsiveForce g ps w l tweak = map disp vs
-  where 
+  where
     vs = zip (Graph.vertices g) ps
     disp (v,vpos) = Point.sum [disp' f vpos upos | (u,upos) <- vs, u /= v]
     f norm = fr g w l norm tweak
 
 edgeMap g = Map.fromListWith (++) edge_list
-  where 
+  where
     edge_list = map (\(a,b) -> (a,[b])) (Graph.edges g)
 
 edgeMapRev g = Map.fromListWith (++) edge_list
-  where 
+  where
     edge_list = map ((\(a,b) -> (a,[b])).(\(a,b) -> (b,a))) (Graph.edges g)
 
 attractiveForce :: (Ord a, Floating a) => Graph.Graph -> [(a,a)] -> Int -> Int -> a -> [(a,a)]
 attractiveForce g ps w l tweak = map disp vs
-  where 
+  where
     vs = zip (Graph.vertices g) ps
     e = edgeMap g
     e' = edgeMapRev g
-    adjacent v m 
+    adjacent v m
         | Map.lookup v m == Nothing = []
         | otherwise = map (\x -> (x, ps !! x)) (fromJust (Map.lookup v m))
     adjacentFrom v = adjacent v e
@@ -64,9 +64,9 @@ attractiveForce g ps w l tweak = map disp vs
 
 positionNodes :: (Ord a, Floating a) => Graph.Graph -> [(a,a)] -> [(a,a)] -> [(a,a)] -> Int -> Int -> a -> [(a,a)]
 positionNodes g pos rdisp adisp w l temp = zipWith3 repo pos rdisp adisp
-  where 
+  where
     repo vpos r a = fitInCanvas (Point.add vpos (Point.scale dispv (temp/(Point.normal dispv))))
-      where 
+      where
         dispv = Point.add r a
     fitInCanvas (x,y) = (min (w'/2) (max (-w'/2) x), min (l'/2) (max (-l'/2) y))
     w' = fromIntegral w
@@ -99,8 +99,10 @@ allPositions g initPos w l iters tweak = reverse (foldl f (initPos:[]) temps)
         adisp = attractiveForce g pos w l tweak
     f (x:xs) temp = (newPos x temp):x:xs
 
-getAllPositions g w l iters tweak = do
-    initPos <- randomPos (length (Graph.vertices g)) w l 
-    let initPosFloat = map (\(x,y) -> (fromIntegral x, fromIntegral y)) initPos
-    let posList = allPositions g initPosFloat w l iters tweak
-    return posList
+getAllPositions ::
+  (Floating a, Ord a) =>
+    Graph.Graph -> Int -> Int -> Int -> a -> IO [[(a, a)]]
+getAllPositions g w l i t = do
+  rand <- randomPos (length $ Graph.vertices g) w l
+  initPos <- mapM (\(x,y) -> return (fromIntegral x, fromIntegral y)) rand
+  return $ allPositions g initPos w l i t

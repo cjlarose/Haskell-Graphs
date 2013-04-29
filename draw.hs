@@ -17,18 +17,10 @@ createWindow ::
     (RealFrac a, Floating a, Ord a) =>
         Graph.Graph -> Int -> Int -> Int -> a -> IO ()
 createWindow g w h i t = do
+    position <- fmap (\x -> createFrame g $ head x) (getAllPositions g w h i t)
     win <- openWindow "Chris and Roey's Zany Graph Drawing Window" (w, h)
-    resultMap <- (getResultMap g w h i t)
-    mapM_ (drawInWindow win) (head resultMap)
+    mapM_ (drawInWindow win) position
     onClose win
-
-getResultMap ::
-    (RealFrac a, Floating a, Ord a) =>
-        Graph.Graph -> Int -> Int -> Int -> a -> IO [[Graphic]]
-getResultMap g w h i t = do
-    posList <- getAllPositions g w h i t
-    let resultMap = map (\x -> createFrame g i x) posList
-    return resultMap
 
 onClose :: Window -> IO ()
 onClose w = do
@@ -40,19 +32,15 @@ onClose w = do
 -- -- -- -- -- -- -- -- -- --
 --     Create Circles      --
 -- -- -- -- -- -- -- -- -- --
-createFrame ::
-    (RealFrac a, Floating a, Ord a) =>
-        Graph.Graph -> Int -> [(a, a)] -> [Graphic]
-createFrame g i list = circles ++ lines
-    where circles = map (\x -> createCircle g i x) list
-          lines   = getLineGraphics g list
-
-createCircle ::
-    (RealFrac a, Floating a, Ord a) =>
-        Graph.Graph -> Int -> (a, a) -> Graphic
-createCircle g i point = SOE.ellipse (x - r, y - r) (x + r, y + r)
-    where (x, y) = Point.round point
-          r = 15
+createFrame :: (RealFrac a) => Graph.Graph -> [(a, a)] -> [Graphic]
+createFrame g list = circles ++ lines
+    where
+        circles = map (\x -> createCircle x) list
+        lines   = getLineGraphics g list
+        createCircle point = SOE.ellipse (x - r, y - r) (x + r, y + r)
+            where
+                (x, y) = Point.round point
+                r = 15
 
 --TODO: calculateRadius Will count number of nodes to draw and make the radius of the circles sized accordingly to fit
 
