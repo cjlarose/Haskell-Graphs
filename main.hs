@@ -26,6 +26,35 @@ data Flag
         | SocFile        -- -s file
         deriving (Eq, Ord, Enum, Show, Bounded)
 
+flags = [Option ['h'] []           (NoArg Help)
+            "Print help and exit.",
+         Option ['C'] []           (NoArg Tweak)
+            "Tweak factor. [0..1]",
+         Option ['d'] []           (NoArg Delay)
+            "Delay in milliseconds between graphs. Default is 100",
+         Option ['i'] []           (NoArg Iterations)
+            "Number of iterations. Default is 20",
+         Option ['W'] []           (NoArg Width)
+            "Window width. Defualt is 500.",
+         Option ['H'] []           (NoArg Height)
+            "Window height. Default is 500.",
+         Option ['n'] []           (NoArg Nodes)
+            "Number of nodes in the graph. Default is 5",
+         Option ['g'] []           (NoArg List)
+            "Generate a linked list graph. Default graph type.",
+         Option ['g'] []           (NoArg Cycle)
+            "Generate a simple cycle graph.",
+         Option ['g'] []           (NoArg Star)
+            "Generate a star graph.",
+         Option ['g'] []           (NoArg K)
+            "Generate a complete graph.",
+         Option ['g'] []           (NoArg Tree)
+            "Generate a binary tree.",
+         Option ['f'] []           (NoArg File)
+            "Load a graph from a file.",
+         Option ['s'] []           (NoArg SocFile)
+            "Load a social graph from a file."]
+
 --Define our graph for later usage
 (graph,_ ,_) = GraphGen.star 7
 
@@ -51,7 +80,7 @@ usageStrings =
      "-i n         : Number of iterations. Default is 20.",
      "-W n         : Window width. Defualt is 500.",
      "-M n         : Window height. Default is 500.",
-     "-n n         : Number of nodes in the graph. Defualt is 5.",
+     "-n n         : Number of nodes in the graph. Default is 5.",
      "-g list      : Generate a linked list graph. Default.",
      "-g cycle     : Generate a simple cycle graph.",
      "-g star      : Generate a star graph.",
