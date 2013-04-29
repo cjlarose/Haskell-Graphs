@@ -1,12 +1,33 @@
 import System.Environment
+import System.Console.GetOpt
 import System.Exit
 import qualified Draw
 import qualified GraphGen
+import Data.Map (fromList)
 
 main = getArgs >>= parse
 
+env = Data.Map.fromList `fmap` getEnvironment
+
+data Flag
+        = Help           -- -h
+        | Tweak          -- -C n
+        | Delay          -- -d n
+        | Iterations     -- -i n
+        | Width          -- -W n
+        | Height         -- -H n
+        | Nodes          -- -n n
+        | List           -- -g list
+        | Cycle          -- -g cycle
+        | Star           -- -g star
+        | K              -- -g complete
+        | Tree           -- -g tree
+        | File           -- -f file
+        | SocFile        -- -s file
+        deriving (Eq, Ord, Enum, Show, Bounded)
+
 --Define our graph for later usage
-(graph,_ ,_) = GraphGen.list 7
+(graph,_ ,_) = GraphGen.star 7
 
 -- -- -- -- -- -- -- -- -- --
 --   Command Line Parsing  --
@@ -15,6 +36,7 @@ main = getArgs >>= parse
 --parse (num:f1:f2:[]) = visualize (read num :: Int) f1 f2 >> exit
 parse ["-h"] = usage >> exit
 parse _ = Draw.createWindow graph 640 480 20 0
+--parse ["-g"] = do params <- sequence []
 
 -- -- -- -- -- -- -- -- -- --
 --    Usage Definitions    --
