@@ -1,9 +1,12 @@
 HC = ghc
 HCFLAGS =
-EXECUTABLES = testdraw
+EXECUTABLES = testdraw simple
 
 testdraw: testdraw.hs
 	$(HC) $(HCFLAGS) testdraw.hs
+
+simple: SimpleGraphics.hs
+	$(HC) $(HCFLAGS) -o simple SimpleGraphics.hs
 
 .PHONY : all
 all: $(EXECUTABLES)
