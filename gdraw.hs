@@ -2,6 +2,7 @@ module GDraw (
     repulsiveForce,
     attractiveForce,
     positionNodes,
+    getAllPositions
 ) where
 import qualified Data.Graph as Graph
 import qualified Data.Map as Map
@@ -82,17 +83,24 @@ randomPos p w l = do
     let ps = zipWith (\x y -> (x `mod` w, y `mod` l)) l1 l2
     return ps
 
-temperatures :: (Floating a) => Int -> Int -> [a]
+temperatures :: (Floating a) => a -> Int -> [a]
 temperatures init len = map f [0..len-1]
   where
-    k = (fromIntegral init) / (fromIntegral len)
-    f x = (fromIntegral init) - ((fromIntegral x) * k)
+    k = init / (fromIntegral len)
+    f x = init - ((fromIntegral x) * k)
 
-{--
-allPositions g w l iters tweak = foldl f initialPositions temps
+allPositions :: (Floating a, Ord a) => Graph.Graph -> [(a,a)] -> Int -> Int -> Int -> a -> [[(a,a)]]
+allPositions g initPos w l iters tweak = reverse (foldl f (initPos:[]) temps)
   where
-    initialPositions = randomPos (length (Graph.vertices g)) w l
-    temps = temperatures ((fromIntegreal w) / 10) iters
-gdraw :: (Floating a) => Graph.Graph -> Int -> Int -> Int -> a -> [[(a,a)]]
-gdraw g w l iters tweak = 
---}
+    temps = temperatures ((fromIntegral w) / 10) iters
+    newPos pos temp = positionNodes g pos rdisp adisp w l temp
+      where
+        rdisp = repulsiveForce g pos w l tweak
+        adisp = attractiveForce g pos w l tweak
+    f (x:xs) temp = (newPos x temp):x:xs
+
+getAllPositions g w l iters tweak = do
+    initPos <- randomPos (length (Graph.vertices g)) w l 
+    let initPosFloat = map (\(x,y) -> (fromIntegral x, fromIntegral y)) initPos
+    let posList = allPositions g initPosFloat w l iters tweak
+    return posList
