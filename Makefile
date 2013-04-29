@@ -5,7 +5,7 @@ EXECUTABLES = testdraw
 testdraw: testdraw.hs
 	$(HC) $(HCFLAGS) testdraw.hs
 
-.PHONY: all
+.PHONY : all
 all: $(EXECUTABLES)
 
 .PHONY : clean
