@@ -1,15 +1,20 @@
 import System.Environment
 import System.Exit
 import qualified Draw
+import qualified GraphGen
 
 main = getArgs >>= parse
 
 parse ["-h"] = usage >> exit
 --parse ("-f":num:f1:f2:[]) = visualize' (read num :: Int) f1 f2 >> exit
 --parse (num:f1:f2:[]) = visualize (read num :: Int) f1 f2 >> exit
-parse _ = Draw.initWindow
+--parse _ = usage >> exit
+parse _ = Draw.initWindow graph 640 480 20 0
+    where (graph, a , b) = GraphGen.list 15
 
-usage   = mapM_ putStrLn
+usage   = mapM_ putStrLn usageStrings
+
+usageStrings =
     ["-h           : Print help and exit.",
      "-C n         : Tweak factor. [0..1]",
      "-d n         : Delay in milliseconds between graph displays.",
