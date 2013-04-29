@@ -5,6 +5,8 @@ module GDraw (
 ) where
 import qualified Data.Graph as Graph
 import qualified Data.Map as Map
+import qualified System.Random as Random
+import qualified Data.List as List
 import Data.Maybe (fromJust)
 import qualified Point
 
@@ -70,3 +72,16 @@ positionNodes g pos rdisp adisp w l temp = zipWith3 repo pos rdisp adisp
     fitInCanvas (x,y) = (min (w'/2) (max (-w'/2) x), min (l'/2) (max (-l'/2) y))
     w' = fromIntegral w
     l' = fromIntegral l
+
+randomList :: Int -> Random.StdGen -> [Int]
+randomList n = take n . List.unfoldr (Just . Random.random)
+
+randomPos p w l = do
+    seed1 <- Random.newStdGen
+    seed2 <- Random.newStdGen
+    let l1 = randomList p seed1
+    let l2 = randomList p seed2
+    let ps = zipWith (\x y -> (x `mod` w, y `mod` l)) l1 l2
+    return ps
+
+{--gdraw :: Grpah.Graph -> Int -> Int -> Int -> a -> Int -> [(a,a)]--}
