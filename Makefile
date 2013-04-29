@@ -5,7 +5,7 @@ EXECUTABLES = testdraw simple main lines
 testdraw: testdraw.hs
 	$(HC) $(HCFLAGS) testdraw.hs
 
-main: main.hs
+main: main.hs graph.hs graphgen.hs gdraw.hs draw.hs point.hs
 	$(HC) $(HCFLAGS) main.hs
 
 simple: SimpleGraphics.hs
