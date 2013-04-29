@@ -1,9 +1,9 @@
-GC = ghc
-GCFLAGS =
+HC = ghc
+HCFLAGS =
 EXECUTABLES = testdraw
 
 testdraw: testdraw.hs
-	$(GC) $(GCFLAGS) testdraw.hs
+	$(HC) $(HCFLAGS) testdraw.hs
 
 .PHONY: all
 all: $(EXECUTABLES)
