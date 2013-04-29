@@ -3,19 +3,23 @@ import System.Exit
 import qualified Draw
 import qualified GraphGen
 
---Define our graph for later usage
-(graph,_ ,_) = GraphGen.binaryTree 7
-
 main = getArgs >>= parse
 
-parse ["-h"] = usage >> exit
+--Define our graph for later usage
+(graph,_ ,_) = GraphGen.list 7
+
+-- -- -- -- -- -- -- -- -- --
+--   Command Line Parsing  --
+-- -- -- -- -- -- -- -- -- --
 --parse ("-f":num:f1:f2:[]) = visualize' (read num :: Int) f1 f2 >> exit
 --parse (num:f1:f2:[]) = visualize (read num :: Int) f1 f2 >> exit
---parse _ = usage >> exit
-parse _ = Draw.initWindow graph 640 480 20 0
+parse ["-h"] = usage >> exit
+parse _ = Draw.createWindow graph 640 480 20 0
 
-usage   = mapM_ putStrLn usageStrings
-
+-- -- -- -- -- -- -- -- -- --
+--    Usage Definitions    --
+-- -- -- -- -- -- -- -- -- --
+usage        = mapM_ putStrLn usageStrings
 usageStrings =
     ["-h           : Print help and exit.",
      "-C n         : Tweak factor. [0..1]",
@@ -36,5 +40,9 @@ usageStrings =
      "",
      "Example usage:",
      "      main -g tree -n 10 -i 50 -d 0"]
-exit    = exitWith ExitSuccess
-die     = exitWith (ExitFailure 1)
+
+-- -- -- -- -- -- -- -- -- --
+--     Exit Definitions    --
+-- -- -- -- -- -- -- -- -- --
+exit = exitWith ExitSuccess
+die  = exitWith (ExitFailure 1)
