@@ -16,4 +16,10 @@ star n = graphFromEdgeList [("1", (show v)) | v <- [2..n]]
 complete n = graphFromEdgeList 
     [((show a), (show b)) | a <- [1..n], b <- [1..n], a /= b]
 
-binaryTree n = graphFromEdgeList []
+binaryTree n = graphFromEdgeList (map (\(a,b) -> (show a, show b)) 
+    (concat [neighbors v | v <- [1..n]]))
+  where
+    neighbors v
+        | (2*v) > n = []
+        | (2*v + 1) > n = [2*v]
+        | otherwise = [2*v, (2*v) + 1]
