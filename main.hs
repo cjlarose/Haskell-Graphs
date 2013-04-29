@@ -3,6 +3,9 @@ import System.Exit
 import qualified Draw
 import qualified GraphGen
 
+--Define our graph for later usage
+(graph,_ ,_) = GraphGen.binaryTree 7
+
 main = getArgs >>= parse
 
 parse ["-h"] = usage >> exit
@@ -10,7 +13,6 @@ parse ["-h"] = usage >> exit
 --parse (num:f1:f2:[]) = visualize (read num :: Int) f1 f2 >> exit
 --parse _ = usage >> exit
 parse _ = Draw.initWindow graph 640 480 20 0
-    where (graph, a , b) = GraphGen.cycle 15
 
 usage   = mapM_ putStrLn usageStrings
 

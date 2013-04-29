@@ -5,21 +5,27 @@ module GraphGen (
     complete,
     binaryTree,
 ) where
-import Graph (graphFromEdgeList)
+import qualified Graph (graphFromEdgeList, LabeledGraph)
 
-list n = graphFromEdgeList [(show v, show (v+1)) | v <- [1..(n-1)]]
+list :: (Enum a, Num a, Show a) => a -> Graph.LabeledGraph
+list n = Graph.graphFromEdgeList [(show v, show (v+1)) | v <- [1..(n-1)]]
 
-cycle n = graphFromEdgeList edges
-    where edges = map (\(x, y) -> (show (x+1), show (y+1)))
+cycle :: (Integral a, Show a) => a -> Graph.LabeledGraph
+cycle n = Graph.graphFromEdgeList edges
+    where edges = map (\(a, b) -> (show (a+1), show (b+1)))
                     [(v, (((v+1) `mod` n))) | v <- [0..n-1]]
 
-star n = graphFromEdgeList [("1", (show v)) | v <- [2..n]]
+star :: (Enum a, Num a, Show a) => a -> Graph.LabeledGraph
+star n = Graph.graphFromEdgeList [("1", (show v)) | v <- [2..n]]
 
-complete n = graphFromEdgeList
+complete :: (Enum a, Eq a, Num a, Show a) => a -> Graph.LabeledGraph
+complete n = Graph.graphFromEdgeList
     [((show a), (show b)) | a <- [1..n], b <- [1..n], a /= b]
 
-binaryTree n = graphFromEdgeList (map (\(a,b) -> (show a, show b))
-    (concat [neighbors v | v <- [1..n]]))
+binaryTree :: (Ord a, Enum a, Num a, Show a) => a -> Graph.LabeledGraph
+binaryTree n = Graph.graphFromEdgeList
+    (map (\(a,b) -> (show a, show b))
+         (concat [map (\x -> (v, x)) (neighbors v) | v <- [1..n]]))
   where
     neighbors v
         | (2*v) > n = []

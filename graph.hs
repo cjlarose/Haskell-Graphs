@@ -3,6 +3,7 @@ module Graph (
     graphFromMap,
     readGraphFile,
     readSocialGraphFile,
+    LabeledGraph,
 ) where
 import qualified Data.Graph as Graph
 import System.IO
