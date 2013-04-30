@@ -4,8 +4,9 @@ module GraphDraw (
 
 import Data.Maybe (isJust, fromJust)
 import qualified Data.Graph as Graph
+import Data.Int (Int64)
 import qualified Control.Concurrent.Timer as Timer (oneShotTimer)
-import qualified Control.Concurrent.Suspend.Lifted as Delay (msDelay)
+import qualified Control.Concurrent.Suspend.Lifted as Delay (msDelay, Delay)
 import Graphics.UI.GLFW (terminate)
 import SOE
 import GraphPhysics (newGraphAnimation, getNextGraph, GraphAnimation, graph, positions)
@@ -16,24 +17,26 @@ import qualified Point (round, add)
 -- -- -- -- -- -- -- -- -- --
 
 createWindow :: (RealFrac a, Show a, Floating a, Ord a) =>
-        GraphAnimation a -> Int -> Int -> IO ()
-createWindow ga w h = do
+    GraphAnimation a -> Int -> Int -> Int64 -> IO ()
+createWindow ga w h delayms = do
     win <- openWindow "Chris and Roey's Zany Graph Drawing Window" (w, h)
-    drawGraph win ga center
+    let center = (w `div` 2, h `div` 2)
+    drawGraph win ga center (Delay.msDelay delayms)
     onClose win
         where center = (w `div` 2, h `div` 2)
 
 drawGraph :: (RealFrac a, Show a, Floating a, Ord a) =>
-        Window -> GraphAnimation a -> (Int, Int) -> IO ()
-drawGraph w ga center = do
+    Window -> GraphAnimation a -> (Int, Int) -> Delay.Delay -> IO ()
+drawGraph w ga center delay = do
     putStrLn (show (positions ga))
     let frame = createFrame center (graph ga) (positions ga)
     let graphic = overGraphics frame
     let newGraph = getNextGraph ga
     setGraphic w graphic
     if (isJust newGraph)
-        then Timer.oneShotTimer
-            (drawGraph w (fromJust newGraph) center) (Delay.msDelay 30)
+        then
+            Timer.oneShotTimer
+                (drawGraph w (fromJust newGraph) center delay) delay
             >> return ()
         else return ()
     return ()

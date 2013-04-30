@@ -12,6 +12,7 @@ import Text.Printf
 import qualified GraphDraw
 import qualified GraphGen
 import qualified GraphPhysics (newGraphAnimation)
+import Data.Int (Int64)
 
 -- -- -- -- -- -- -- -- -- --
 --   Command Line Parsing  --
@@ -63,7 +64,7 @@ main = do
         else putStrLn $ "NOT SOCfile"
 
     ga <- GraphPhysics.newGraphAnimation g (width flags) (height flags) (iterations flags) (tweak flags)
-    GraphDraw.createWindow ga (width flags) (height flags)
+    GraphDraw.createWindow ga (width flags) (height flags) (delay flags)
     {--Draw.createWindow g (width flags) (height flags) (iterations flags) (tweak flags)--}
 
 parse argv = case getOpt Permute options argv of
@@ -97,7 +98,7 @@ graphTypes = ["list", "cycle", "star", "complete", "tree"]
 
 data Options = Options
     { tweak       :: Float,
-      delay       :: Int,
+      delay       :: Int64,
       iterations  :: Int,
       width       :: Int,
       height      :: Int,

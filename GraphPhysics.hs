@@ -2,7 +2,6 @@ module GraphPhysics (
     repulsiveForce,
     attractiveForce,
     positionNodes,
-    getAllPositions,
     newGraphAnimation,
     getNextGraph,
     GraphAnimation,
@@ -32,7 +31,7 @@ fr g w l z tweak = (k^2) / z
   where
     k = kfun g w l tweak
 
-disp' f vpos upos = Point.scale delta ((f norm) / norm)
+disp' f vpos upos = Point.scale ((f norm) / norm) delta
   where
     delta = Point.sub vpos upos
     norm = max (Point.normal delta) 0.01
@@ -70,7 +69,7 @@ attractiveForce g ps w l tweak = map disp vs
 positionNodes :: (Ord a, Floating a) => Graph.Graph -> [(a,a)] -> [(a,a)] -> [(a,a)] -> Int -> Int -> a -> [(a,a)]
 positionNodes g pos rdisp adisp w l temp = zipWith3 repo pos rdisp adisp
   where
-    repo vpos r a = fitInCanvas (Point.add vpos (Point.scale dispv (temp/(Point.normal dispv))))
+    repo vpos r a = fitInCanvas (Point.add vpos (Point.scale (temp/(Point.normal dispv)) dispv))
       where
         dispv = Point.add r a
     fitInCanvas (x,y) = (x', y')
@@ -97,29 +96,11 @@ temperatures init len = map f [0..len-1]
     k = init / (fromIntegral len)
     f x = init - ((fromIntegral x) * k)
 
-allPositions :: (Floating a, Ord a) => Graph.Graph -> [(a,a)] -> Int -> Int -> Int -> a -> [[(a,a)]]
-allPositions g initPos w l iters tweak = reverse (foldl f (initPos:[]) temps)
-  where
-    temps = temperatures ((fromIntegral w) / 10) iters
-    newPos pos temp = positionNodes g pos rdisp adisp w l temp
-      where
-        rdisp = repulsiveForce g pos w l tweak
-        adisp = attractiveForce g pos w l tweak
-    f (x:xs) temp = (newPos x temp):x:xs
-
 nextPosition :: (Floating a, Ord a) => Graph.Graph -> [(a,a)] -> Int -> Int -> a -> a -> [(a,a)]
 nextPosition g pos w h tweak temp = positionNodes g pos rdisp adisp w h temp
   where
     rdisp = repulsiveForce g pos w h tweak
     adisp = attractiveForce g pos w h tweak
-
-getAllPositions ::
-  (Floating a, Ord a) =>
-    Graph.Graph -> Int -> Int -> Int -> a -> IO [[(a, a)]]
-getAllPositions g w l i t = do
-  rand <- randomPos (length $ Graph.vertices g) w l
-  initPos <- mapM (\(x,y) -> return (fromIntegral x, fromIntegral y)) rand
-  return $ allPositions g initPos w l i t
 
 data GraphAnimation a = GraphAnimation {
       graph :: Graph.Graph

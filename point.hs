@@ -20,7 +20,7 @@ add (ax, ay) (bx, by) = (ax + bx, ay + by)
 
 sub (ax, ay) (bx, by) = (ax - bx, ay - by)
 
-scale (x,y) c = (c * x, c * y)
+scale c (x,y) = (c * x, c * y)
 
 {--sum = foldl Point.add (0,0)--}
 sum ps = (Prelude.sum (map fst ps), Prelude.sum (map snd ps))
