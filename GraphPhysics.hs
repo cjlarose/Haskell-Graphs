@@ -73,7 +73,10 @@ positionNodes g pos rdisp adisp w l temp = zipWith3 repo pos rdisp adisp
     repo vpos r a = fitInCanvas (Point.add vpos (Point.scale dispv (temp/(Point.normal dispv))))
       where
         dispv = Point.add r a
-    fitInCanvas (x,y) = (min (w'/2) (max (-w'/2) x), min (l'/2) (max (-l'/2) y))
+    fitInCanvas (x,y) = (x', y')
+      where
+        x' = min (w'/2) (max (-w'/2) x)
+        y' = min (l'/2) (max (-l'/2) y)
     w' = fromIntegral w
     l' = fromIntegral l
 
