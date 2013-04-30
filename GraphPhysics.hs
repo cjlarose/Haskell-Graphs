@@ -73,14 +73,8 @@ gravity :: (Ord a, Floating a) => Graph.Graph -> [(a,a)] -> Int -> Int -> a -> [
 gravity g ps w l tweak = map disp vs
   where
     vs = zip (Graph.vertices g) ps
-    {--disp (v,(x,y)) = (x / 2, y / 2)--}
     disp (v,vpos) = disp' f (0,0) vpos
     f norm = fa g w l norm tweak (length (Graph.vertices g))
-    sqrp (x, y) = ((signum x) * x^2, (signum y) * y^2)
-    {--sqrtp (x,y) = (sqrt' x, sqrt' y)
-    sqrt' x
-        | x >= 0 = sqrt x
-        | otherwise = -(sqrt (-x))--}
 
 zipWith4 f [] _ _ _ = []
 zipWith4 f _ [] _ _ = []
