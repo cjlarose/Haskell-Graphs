@@ -8,6 +8,7 @@ module GraphPhysics (
     graph,
     positions,
     gravity,
+    temperatures,
 ) where
 import qualified Data.Graph as Graph
 import qualified Data.Map as Map
@@ -113,11 +114,19 @@ randomPos p w l = do
     let ps = zipWith (\x y -> (x `mod` w, y `mod` l)) l1 l2
     return ps
 
-temperatures :: (Floating a) => a -> Int -> [a]
+{--temperatures :: (Floating a) => a -> Int -> [a]
 temperatures init len = map f [0..len-1]
   where
     k = init / (fromIntegral len)
-    f x = init - ((fromIntegral x) * k)
+    f x = init - ((fromIntegral x) * k)--}
+
+temperatures :: (Floating a, Ord a) => a -> Int -> [a]
+temperatures init len = map f [0..len]
+  where
+    e = exp 1
+    a = init / e
+    k = -1 / (fromIntegral len)
+    f x = (init * (e ** (k * (fromIntegral x)))) - a
 
 nextPosition :: (Floating a, Ord a) => Graph.Graph -> [(a,a)] -> Int -> Int -> a -> a -> [(a,a)]
 nextPosition g pos w h tweak temp = positionNodes g pos rdisp adisp gdisp w h temp
@@ -135,7 +144,7 @@ data GraphAnimation a = GraphAnimation {
     , temps :: [a]
 }
 
-newGraphAnimation :: (Floating a) => Graph.Graph -> Int -> Int -> Int -> a -> IO (GraphAnimation a)
+newGraphAnimation :: (Floating a, Ord a) => Graph.Graph -> Int -> Int -> Int -> a -> IO (GraphAnimation a)
 newGraphAnimation g w h i t = do
     rand <- randomPos (length $ Graph.vertices g) w h
     initPos <- mapM (\(x,y) -> return (fromIntegral x, fromIntegral y)) rand
