@@ -7,4 +7,5 @@ simple
 main
 lines
 exdraw
-main.prof
+*.prof
+main_prof
