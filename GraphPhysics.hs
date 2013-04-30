@@ -32,7 +32,7 @@ fr g w l z tweak = (k^2) / z
   where
     k = kfun g w l tweak
 
-disp' f vpos upos = Point.scale delta ((f norm) / norm)
+disp' f vpos upos = Point.scale ((f norm) / norm) delta
   where
     delta = Point.sub vpos upos
     norm = max (Point.normal delta) 0.01
@@ -70,7 +70,7 @@ attractiveForce g ps w l tweak = map disp vs
 positionNodes :: (Ord a, Floating a) => Graph.Graph -> [(a,a)] -> [(a,a)] -> [(a,a)] -> Int -> Int -> a -> [(a,a)]
 positionNodes g pos rdisp adisp w l temp = zipWith3 repo pos rdisp adisp
   where
-    repo vpos r a = fitInCanvas (Point.add vpos (Point.scale dispv (temp/(Point.normal dispv))))
+    repo vpos r a = fitInCanvas (Point.add vpos (Point.scale (temp/(Point.normal dispv)) dispv))
       where
         dispv = Point.add r a
     fitInCanvas (x,y) = (x', y')
