@@ -3,7 +3,7 @@ module GraphDraw (
     sierpinskiTriangle,
 ) where
 
-import Data.Maybe (isJust, fromJust)
+import Data.Maybe (isJust, fromJust, isNothing)
 import qualified Data.Graph as Graph
 import Data.Int (Int64)
 import qualified Control.Concurrent.Timer as Timer (oneShotTimer)
@@ -22,22 +22,29 @@ createWindow :: (RealFrac a, Show a, Floating a, Ord a) =>
 createWindow ga w h delayms nodeColor edgeColor = do
     win <- openWindow "Chris and Roey's Zany Graph Drawing Window" (w, h)
     let center = (w `div` 2, h `div` 2)
-    drawGraph win ga center (Delay.msDelay delayms) nodeColor edgeColor
+    let skip = (delayms == 0)
+    drawGraph win ga center (Delay.msDelay delayms) nodeColor edgeColor skip
     onClose win
         where center = (w `div` 2, h `div` 2)
 
 drawGraph :: (RealFrac a, Show a, Floating a, Ord a) =>
-    Window -> GraphAnimation a -> (Int, Int) -> Delay.Delay -> Color -> Color -> IO ()
-drawGraph w ga center delay nodeColor edgeColor = do
+    Window -> GraphAnimation a -> (Int, Int) -> Delay.Delay -> Color -> Color -> Bool -> IO ()
+drawGraph w ga center delay nodeColor edgeColor skip = do
     putStrLn (show (positions ga))
     let frame = createFrame center (graph ga) (positions ga) nodeColor edgeColor
     let graphic = overGraphics frame
     let newGraph = getNextGraph ga
-    setGraphic w graphic
+    if (isNothing newGraph && skip)
+        then setGraphic w graphic
+        else return ()
     if (isJust newGraph)
-        then Timer.oneShotTimer
-                (drawGraph w (fromJust newGraph) center delay nodeColor edgeColor) delay
-            >> return ()
+        then if (not skip)
+           then setGraphic w graphic
+               >> Timer.oneShotTimer
+                  (drawGraph w (fromJust newGraph) center delay nodeColor edgeColor skip) delay
+               >> return ()
+           else drawGraph w (fromJust newGraph) center delay nodeColor edgeColor skip
+               >> return ()
         else return ()
     return ()
 
@@ -86,7 +93,7 @@ sierpinskiTriangle w h color =
     runGraphics (
         do openWindow "Sierpinski's Triangle" (w, h)
             >>= \win ->
-            sierpinskiTri win 50 300 512 color
+            sierpinskiTri win (w `div` 2) (h `div` 2) 256 color
             >> onClose win
         )
 
