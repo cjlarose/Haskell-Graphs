@@ -1,4 +1,4 @@
-module Draw (
+module GraphDraw (
     createWindow,
 ) where
 
@@ -8,7 +8,7 @@ import qualified Control.Concurrent.Timer as Timer (oneShotTimer)
 import qualified Control.Concurrent.Suspend.Lifted as Delay (msDelay)
 import Graphics.UI.GLFW (terminate)
 import SOE
-import GDraw (newGraphAnimation, getNextGraph, GraphAnimation, graph, positions)
+import GraphPhysics (newGraphAnimation, getNextGraph, GraphAnimation, graph, positions)
 import qualified Point (round)
 
 -- -- -- -- -- -- -- -- -- --

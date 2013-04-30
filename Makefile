@@ -1,15 +1,9 @@
 HC = ghc
 HCFLAGS =
-EXECUTABLES = testdraw simple main lines
+EXECUTABLES = main
 
-main: main.hs graph.hs graphgen.hs gdraw.hs draw.hs point.hs
+main: Main.hs Graph.hs GraphGen.hs GraphPhysics.hs GraphDraw.hs Point.hs
 	$(HC) $(HCFLAGS) main.hs
-
-testdraw: testdraw.hs
-	$(HC) $(HCFLAGS) testdraw.hs
-
-simple: SimpleGraphics.hs
-	$(HC) $(HCFLAGS) -o simple SimpleGraphics.hs
 
 .PHONY : all
 all: $(EXECUTABLES)

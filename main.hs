@@ -9,9 +9,9 @@ import Data.Char
 import Data.Maybe (fromMaybe)
 import Control.Monad
 import Text.Printf
-import qualified Draw
+import qualified GraphDraw
 import qualified GraphGen
-import qualified GDraw (newGraphAnimation)
+import qualified GraphPhysics (newGraphAnimation)
 
 -- -- -- -- -- -- -- -- -- --
 --   Command Line Parsing  --
@@ -62,8 +62,8 @@ main = do
         then do putStrLn $ "SOCfile " ++ show (socFile flags)
         else putStrLn $ "NOT SOCfile"
 
-    ga <- GDraw.newGraphAnimation g (width flags) (height flags) (iterations flags) (tweak flags)
-    Draw.createWindow ga (width flags) (height flags)
+    ga <- GraphPhysics.newGraphAnimation g (width flags) (height flags) (iterations flags) (tweak flags)
+    GraphDraw.createWindow ga (width flags) (height flags)
     {--Draw.createWindow g (width flags) (height flags) (iterations flags) (tweak flags)--}
 
 parse argv = case getOpt Permute options argv of

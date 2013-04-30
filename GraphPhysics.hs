@@ -1,4 +1,4 @@
-module GDraw (
+module GraphPhysics (
     repulsiveForce,
     attractiveForce,
     positionNodes,
