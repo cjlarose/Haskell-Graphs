@@ -35,7 +35,8 @@ fr g w l z tweak = (k^2) / z
 disp' f vpos upos = Point.scale ((f norm) / norm) delta
   where
     delta = Point.sub vpos upos
-    norm = max (Point.normal delta) 0.01
+    {--norm = max (Point.normal delta) 0.01--}
+    norm = Point.normal delta
 
 repulsiveForce :: (Ord a, Floating a) => Graph.Graph -> [(a,a)] -> Int -> Int -> a -> [(a,a)]
 repulsiveForce g ps w l tweak = map disp vs
@@ -121,9 +122,9 @@ temperatures init len = map f [0..len-1]
 nextPosition :: (Floating a, Ord a) => Graph.Graph -> [(a,a)] -> Int -> Int -> a -> a -> [(a,a)]
 nextPosition g pos w h tweak temp = positionNodes g pos rdisp adisp gdisp w h temp
   where
-    rdisp = repulsiveForce g pos w h 1
-    adisp = attractiveForce g pos w h 0.2
-    gdisp = gravity g pos w h 0.1
+    rdisp = repulsiveForce g pos w h tweak
+    adisp = attractiveForce g pos w h (tweak / 5)
+    gdisp = gravity g pos w h (tweak / 10)
 
 data GraphAnimation a = GraphAnimation {
       graph :: Graph.Graph
