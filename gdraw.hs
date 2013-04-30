@@ -2,7 +2,12 @@ module GDraw (
     repulsiveForce,
     attractiveForce,
     positionNodes,
-    getAllPositions
+    getAllPositions,
+    newGraphAnimation,
+    getNextGraph,
+    GraphAnimation,
+    graph,
+    positions,
 ) where
 import qualified Data.Graph as Graph
 import qualified Data.Map as Map
@@ -99,6 +104,12 @@ allPositions g initPos w l iters tweak = reverse (foldl f (initPos:[]) temps)
         adisp = attractiveForce g pos w l tweak
     f (x:xs) temp = (newPos x temp):x:xs
 
+nextPosition :: (Floating a, Ord a) => Graph.Graph -> [(a,a)] -> Int -> Int -> a -> a -> [(a,a)]
+nextPosition g pos w h tweak temp = positionNodes g pos rdisp adisp w h temp
+  where
+    rdisp = repulsiveForce g pos w h tweak
+    adisp = attractiveForce g pos w h tweak
+
 getAllPositions ::
   (Floating a, Ord a) =>
     Graph.Graph -> Int -> Int -> Int -> a -> IO [[(a, a)]]
@@ -106,3 +117,26 @@ getAllPositions g w l i t = do
   rand <- randomPos (length $ Graph.vertices g) w l
   initPos <- mapM (\(x,y) -> return (fromIntegral x, fromIntegral y)) rand
   return $ allPositions g initPos w l i t
+
+data GraphAnimation a = GraphAnimation {
+      graph :: Graph.Graph
+    , width :: Int
+    , height :: Int
+    , tweak :: a
+    , positions :: [(a,a)]
+    , temps :: [a]
+}
+
+newGraphAnimation :: (Floating a) => Graph.Graph -> Int -> Int -> Int -> a -> IO (GraphAnimation a)
+newGraphAnimation g w h i t = do
+    rand <- randomPos (length $ Graph.vertices g) w h
+    initPos <- mapM (\(x,y) -> return (fromIntegral x, fromIntegral y)) rand
+    let temps = temperatures ((fromIntegral w) / 10) i
+    return (GraphAnimation g w h t initPos temps)
+
+getNextGraph :: (Floating a, Ord a) => GraphAnimation a -> Maybe (GraphAnimation a)
+getNextGraph (GraphAnimation g w h t pos []) = error "this should never happen"
+getNextGraph (GraphAnimation g w h t pos [_]) = Nothing
+getNextGraph (GraphAnimation g w h t pos (temp:ts)) = Just (GraphAnimation g w h t newPos ts)
+    where newPos = nextPosition g pos w h t temp
+

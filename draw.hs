@@ -2,25 +2,43 @@ module Draw (
     createWindow,
 ) where
 
-import SOE
-import GDraw (getAllPositions)
-import Graphics.UI.GLFW (terminate)
-import qualified Point (round)
+import Data.Maybe (isJust, fromJust)
 import qualified Data.Graph as Graph
+import qualified Control.Concurrent.Timer as Timer (oneShotTimer)
+import qualified Control.Concurrent.Suspend.Lifted as Delay (msDelay)
+import Graphics.UI.GLFW (terminate)
+import SOE
+import GDraw (newGraphAnimation, getNextGraph, GraphAnimation, graph, positions)
+import qualified Point (round)
 
 -- -- -- -- -- -- -- -- -- --
 --     Window Creation     --
 -- -- -- -- -- -- -- -- -- --
 
 -- g w h i t <=> graph width height iterations tweak
-createWindow ::
+{--createWindow ::
     (RealFrac a, Floating a, Ord a) =>
-        Graph.Graph -> Int -> Int -> Int -> a -> IO ()
-createWindow g w h i t = do
-    position <- fmap (\x -> createFrame g $ head x) (getAllPositions g w h i t)
+        Graph.Graph -> Int -> Int -> Int -> a -> IO ()--}
+createWindow :: (RealFrac a, Show a, Floating a, Ord a) => GraphAnimation a -> Int -> Int -> IO ()
+createWindow ga w h = do
     win <- openWindow "Chris and Roey's Zany Graph Drawing Window" (w, h)
-    mapM_ (drawInWindow win) position
+    drawGraph win ga
     onClose win
+
+drawGraph :: (RealFrac a, Show a, Floating a, Ord a) => Window -> GraphAnimation a -> IO ()
+drawGraph w ga = do
+    putStrLn (show (positions ga))
+    let frame = createFrame (graph ga) (positions ga)
+    let graphic = overGraphics frame
+    setGraphic w graphic
+    {--mapM_ (drawInWindow w) frame--}
+    let newGraph = getNextGraph ga
+    if (isJust newGraph)
+        then 
+            Timer.oneShotTimer (drawGraph w (fromJust newGraph)) (Delay.msDelay 500)
+            >> return ()
+        else return ()
+    return ()
 
 onClose :: Window -> IO ()
 onClose w = do
