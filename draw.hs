@@ -3,7 +3,7 @@ module Draw (
 ) where
 
 import SOE
-import GDraw (GraphAnimation, getNextGraph, width, height)
+import GDraw (newGraphAnimation, getNextGraph, GraphAnimation)
 import Graphics.UI.GLFW (terminate)
 import qualified Point (round)
 import qualified Data.Graph as Graph
@@ -17,13 +17,13 @@ import Data.Maybe (isJust, fromJust)
 {--createWindow ::
     (RealFrac a, Floating a, Ord a) =>
         Graph.Graph -> Int -> Int -> Int -> a -> IO ()--}
-createWindow :: GraphAnimation a -> IO ()
-createWindow ga = do
-    win <- openWindow "Chris and Roey's Zany Graph Drawing Window" (width ga, height ga)
+createWindow :: (Floating a, Ord a) => GraphAnimation a -> Int -> Int -> IO ()
+createWindow ga w h = do
+    win <- openWindow "Chris and Roey's Zany Graph Drawing Window" (w, h)
     drawGraph ga
     onClose win
 
-drawGraph :: GraphAnimation a -> IO ()
+drawGraph :: (Floating a, Ord a) => GraphAnimation a -> IO ()
 drawGraph ga = do
     let newGraph = getNextGraph ga
     if (isJust newGraph)

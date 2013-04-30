@@ -5,6 +5,7 @@ module GDraw (
     getAllPositions,
     newGraphAnimation,
     getNextGraph,
+    GraphAnimation,
 ) where
 import qualified Data.Graph as Graph
 import qualified Data.Map as Map
@@ -131,5 +132,9 @@ newGraphAnimation g w h i t = do
     let temps = temperatures ((fromIntegral w) / 10) i
     return (GraphAnimation g w h t initPos temps)
 
-getNextGraph :: GraphAnimation a -> Maybe (GraphAnimation a)
-getNextGraph ga = Just (GraphAnimation (graph ga) (width ga) (height ga) (tweak ga) (positions ga) (temps ga))
+getNextGraph :: (Floating a, Ord a) => GraphAnimation a -> Maybe (GraphAnimation a)
+getNextGraph (GraphAnimation g w h t pos []) = error "this should never happen"
+getNextGraph (GraphAnimation g w h t pos [_]) = Nothing
+getNextGraph (GraphAnimation g w h t pos (temp:ts)) = Just (GraphAnimation g w h t newPos ts)
+    where newPos = nextPosition g pos w h t temp
+
