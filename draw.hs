@@ -2,12 +2,13 @@ module Draw (
     createWindow,
 ) where
 
-import SOE
-import GDraw (newGraphAnimation, getNextGraph, GraphAnimation)
-import Graphics.UI.GLFW (terminate)
-import qualified Point (round)
-import qualified Data.Graph as Graph
 import Data.Maybe (isJust, fromJust)
+import qualified Data.Graph as Graph
+import qualified Control.Concurrent as Concurrent (threadDelay)
+import Graphics.UI.GLFW (terminate)
+import SOE
+import GDraw (newGraphAnimation, getNextGraph, GraphAnimation, graph, positions)
+import qualified Point (round)
 
 -- -- -- -- -- -- -- -- -- --
 --     Window Creation     --
@@ -17,17 +18,23 @@ import Data.Maybe (isJust, fromJust)
 {--createWindow ::
     (RealFrac a, Floating a, Ord a) =>
         Graph.Graph -> Int -> Int -> Int -> a -> IO ()--}
-createWindow :: (Floating a, Ord a) => GraphAnimation a -> Int -> Int -> IO ()
+createWindow :: (RealFrac a, Show a, Floating a, Ord a) => GraphAnimation a -> Int -> Int -> IO ()
 createWindow ga w h = do
     win <- openWindow "Chris and Roey's Zany Graph Drawing Window" (w, h)
-    drawGraph ga
+    drawGraph win ga
     onClose win
 
-drawGraph :: (Floating a, Ord a) => GraphAnimation a -> IO ()
-drawGraph ga = do
+drawGraph :: (RealFrac a, Show a, Floating a, Ord a) => Window -> GraphAnimation a -> IO ()
+drawGraph w ga = do
+    let frame = createFrame (graph ga) (positions ga)
+    putStrLn (show (positions ga))
+    mapM_ (drawInWindow w) frame
+    Concurrent.threadDelay 5000000
     let newGraph = getNextGraph ga
     if (isJust newGraph)
-        then drawGraph (fromJust newGraph)
+        then 
+            clearWindow w
+            >> drawGraph w (fromJust newGraph)
         else return ()
     return ()
 

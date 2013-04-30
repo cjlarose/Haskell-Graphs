@@ -6,6 +6,8 @@ module GDraw (
     newGraphAnimation,
     getNextGraph,
     GraphAnimation,
+    graph,
+    positions,
 ) where
 import qualified Data.Graph as Graph
 import qualified Data.Map as Map
