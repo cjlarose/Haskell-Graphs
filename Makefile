@@ -1,5 +1,5 @@
 HC = ghc
-HCFLAGS =
+HCFLAGS = -O2
 EXECUTABLES = main main_prof
 
 main: Main.hs Graph.hs GraphGen.hs GraphPhysics.hs GraphDraw.hs Point.hs
