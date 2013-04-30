@@ -7,6 +7,7 @@ module GraphPhysics (
     GraphAnimation,
     graph,
     positions,
+    gravity,
 ) where
 import qualified Data.Graph as Graph
 import qualified Data.Map as Map
@@ -34,7 +35,8 @@ fr g w l z tweak = (k^2) / z
 disp' f vpos upos = Point.scale ((f norm) / norm) delta
   where
     delta = Point.sub vpos upos
-    norm = max (Point.normal delta) 0.01
+    {--norm = max (Point.normal delta) 0.01--}
+    norm = Point.normal delta
 
 repulsiveForce :: (Ord a, Floating a) => Graph.Graph -> [(a,a)] -> Int -> Int -> a -> [(a,a)]
 repulsiveForce g ps w l tweak = map disp vs
@@ -66,12 +68,33 @@ attractiveForce g ps w l tweak = map disp vs
     f norm = fa g w l norm tweak
     sumv fn (v,vpos) = Point.sum [disp' f vpos upos | (u,upos) <- fn v]
 
-positionNodes :: (Ord a, Floating a) => Graph.Graph -> [(a,a)] -> [(a,a)] -> [(a,a)] -> Int -> Int -> a -> [(a,a)]
-positionNodes g pos rdisp adisp w l temp = zipWith3 repo pos rdisp adisp
+gravity :: (Ord a, Floating a) => Graph.Graph -> [(a,a)] -> Int -> Int -> a -> [(a,a)]
+gravity g ps w l tweak = map disp vs
   where
-    repo vpos r a = fitInCanvas (Point.add vpos (Point.scale (temp/(Point.normal dispv)) dispv))
+    vs = zip (Graph.vertices g) ps
+    {--disp (v,(x,y)) = (x / 2, y / 2)--}
+    disp (v,vpos) = disp' f (0,0) vpos
+    f norm = fa g w l norm tweak
+    sqrp (x, y) = ((signum x) * x^2, (signum y) * y^2)
+    {--sqrtp (x,y) = (sqrt' x, sqrt' y)
+    sqrt' x
+        | x >= 0 = sqrt x
+        | otherwise = -(sqrt (-x))--}
+
+zipWith4 f [] _ _ _ = []
+zipWith4 f _ [] _ _ = []
+zipWith4 f _ _ [] _ = []
+zipWith4 f _ _ _ [] = []
+zipWith4 f (a:as) (b:bs) (c:cs) (d:ds) = (f a b c d):(zipWith4 f as bs cs ds)
+
+positionNodes :: (Ord a, Floating a) => Graph.Graph -> [(a,a)] -> [(a,a)] -> [(a,a)] -> [(a,a)] -> Int -> Int -> a -> [(a,a)]
+positionNodes g pos rdisp adisp gdisp w l temp = zipWith4 repo pos rdisp adisp gdisp
+  where
+    {--repo vpos r a g = fitInCanvas (Point.add vpos (Point.scale (temp/(Point.normal dispv)) dispv))--}
+    repo vpos r a g = Point.add vpos (Point.scale (temp/(Point.normal dispv)) dispv)
       where
-        dispv = Point.add r a
+        dispv = Point.sum [r,a,g]
+        {--dispv = Point.sum [r,a,g]--}
     fitInCanvas (x,y) = (x', y')
       where
         x' = min (w'/2) (max (-w'/2) x)
@@ -97,10 +120,11 @@ temperatures init len = map f [0..len-1]
     f x = init - ((fromIntegral x) * k)
 
 nextPosition :: (Floating a, Ord a) => Graph.Graph -> [(a,a)] -> Int -> Int -> a -> a -> [(a,a)]
-nextPosition g pos w h tweak temp = positionNodes g pos rdisp adisp w h temp
+nextPosition g pos w h tweak temp = positionNodes g pos rdisp adisp gdisp w h temp
   where
     rdisp = repulsiveForce g pos w h tweak
-    adisp = attractiveForce g pos w h tweak
+    adisp = attractiveForce g pos w h (tweak / 5)
+    gdisp = gravity g pos w h (tweak / 10)
 
 data GraphAnimation a = GraphAnimation {
       graph :: Graph.Graph
