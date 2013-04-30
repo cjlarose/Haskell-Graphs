@@ -9,6 +9,7 @@ import Data.Char
 import Data.Maybe (fromMaybe)
 import Control.Monad
 import Text.Printf
+import SOE
 import qualified GraphDraw
 import qualified GraphGen
 import qualified GraphPhysics (newGraphAnimation)
@@ -23,10 +24,15 @@ main = do
     putStrLn $ "Flags: " ++ show flags
     putStrLn $ "Files: " ++ show files
     -- Help Flag
-    if help flags
+    if (help flags)
         then do hPutStrLn stderr usage
                 exitWith ExitSuccess
         else return (nub [flags], files)
+    -- Sierpinski Flag
+    if (sierpinski flags)
+        then do GraphDraw.sierpinskiTriangle (width flags) (height flags) (nodeColor flags)
+                exitWith ExitSuccess
+        else return ()
     -- Tweak Flag
     if (tweak flags) /= (tweak defaultOptions)
         then do putStrLn $ "TWEAKIGN " ++ show (tweak flags)
@@ -64,8 +70,7 @@ main = do
         else putStrLn $ "NOT SOCfile"
 
     ga <- GraphPhysics.newGraphAnimation g (width flags) (height flags) (iterations flags) (tweak flags)
-    GraphDraw.createWindow ga (width flags) (height flags) (delay flags)
-    {--Draw.createWindow g (width flags) (height flags) (iterations flags) (tweak flags)--}
+    GraphDraw.createWindow ga (width flags) (height flags) (delay flags) (nodeColor flags) (edgeColor flags)
 
 parse argv = case getOpt Permute options argv of
     (args,fs,[]) -> return (foldl (flip id) defaultOptions args, fs)
@@ -91,6 +96,7 @@ header = ["\nExample usage:\n",
           "Available Options:"]
 
 graphTypes = ["list", "cycle", "star", "complete", "tree"]
+colors = [Red, Blue, Green, Yellow, White, Magenta, Cyan, Black]
 
 -- -- -- -- -- -- -- -- -- --
 --    Option Definitions   --
@@ -106,7 +112,10 @@ data Options = Options
       file        :: Maybe FilePath,
       socFile     :: Maybe FilePath,
       graph       :: String,
-      help        :: Bool
+      help        :: Bool,
+      nodeColor   :: Color,
+      edgeColor   :: Color,
+      sierpinski  :: Bool
     } deriving (Show, Eq, Ord)
 
 defaultOptions = Options
@@ -119,13 +128,19 @@ defaultOptions = Options
       file         = Nothing,
       socFile      = Nothing,
       graph        = head graphTypes,
-      help         = False
+      nodeColor    = Blue,
+      edgeColor    = White,
+      help         = False,
+      sierpinski   = False
     }
 
 options :: [OptDescr (Options -> Options)]
 options = [Option ['h'] []
                (NoArg (\o -> o {help = True}))
                "Print help and exit.",
+           Option [] ["sierpinski"]
+               (NoArg (\o -> o {sierpinski = True}))
+               "A special function",
            Option ['C'] []
                (ReqArg (\x o -> o {tweak = read x})
                                     "<TWEAK>")
@@ -139,7 +154,7 @@ options = [Option ['h'] []
                "Delay in milliseconds between graphs. (100 Default)",
            Option ['i'] []
                (ReqArg (\x o -> o {iterations =
-                                    if read x >= 0 && read x <= 1000
+                                    if read x >= 0 && read x <= 10000000
                                         then read x
                                         else iterations defaultOptions})
                                     "<#ITERATIONS>")
@@ -179,6 +194,22 @@ options = [Option ['h'] []
                                         else socFile defaultOptions})
                                     "<FILENAME>")
                "Specify a file to load a social graph from.",
+           Option ['c'] ["nodeColor"]
+               (ReqArg (\x o -> o {nodeColor =
+                                    if x `elem` (map (show) colors)
+                                        then read x
+                                        else nodeColor defaultOptions})
+                                    "<COLOR>")
+               (unlines $
+                    ["Pick a color for the nodes to be: (Blue Default)"] ++ (map (show) colors)),
+           Option [] ["edgeColor"]
+               (ReqArg (\x o -> o {edgeColor =
+                                    if x `elem` (map (show) colors)
+                                        then read x
+                                        else edgeColor defaultOptions})
+                                    "<COLOR>")
+               (unlines $
+                    ["Pick a color for the edges to be: (White Default)"] ++ (map (show) colors)),
            Option ['g'] []
                (ReqArg (\x o -> o {graph =
                                     if x `elem` graphTypes
