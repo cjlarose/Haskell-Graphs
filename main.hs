@@ -109,7 +109,7 @@ data Options = Options
     } deriving (Show, Eq, Ord)
 
 defaultOptions = Options
-    { tweak        = 0.0,
+    { tweak        = 1.0,
       delay        = 100,
       iterations   = 20,
       width        = 500,
@@ -128,7 +128,7 @@ options = [Option ['h'] []
            Option ['C'] []
                (ReqArg (\x o -> o {tweak = read x})
                                     "<TWEAK>")
-               "Sets the tweak factor. Between [0..1]. (0.0 Default)",
+               "Sets the tweak factor. Between [0..1]. (1.0 Default)",
            Option ['d'] []
                (ReqArg (\x o -> o {delay =
                                     if read x >= 0 && read x <= 10000000
