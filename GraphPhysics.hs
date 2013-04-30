@@ -2,7 +2,6 @@ module GraphPhysics (
     repulsiveForce,
     attractiveForce,
     positionNodes,
-    getAllPositions,
     newGraphAnimation,
     getNextGraph,
     GraphAnimation,
@@ -97,29 +96,11 @@ temperatures init len = map f [0..len-1]
     k = init / (fromIntegral len)
     f x = init - ((fromIntegral x) * k)
 
-allPositions :: (Floating a, Ord a) => Graph.Graph -> [(a,a)] -> Int -> Int -> Int -> a -> [[(a,a)]]
-allPositions g initPos w l iters tweak = reverse (foldl f (initPos:[]) temps)
-  where
-    temps = temperatures ((fromIntegral w) / 10) iters
-    newPos pos temp = positionNodes g pos rdisp adisp w l temp
-      where
-        rdisp = repulsiveForce g pos w l tweak
-        adisp = attractiveForce g pos w l tweak
-    f (x:xs) temp = (newPos x temp):x:xs
-
 nextPosition :: (Floating a, Ord a) => Graph.Graph -> [(a,a)] -> Int -> Int -> a -> a -> [(a,a)]
 nextPosition g pos w h tweak temp = positionNodes g pos rdisp adisp w h temp
   where
     rdisp = repulsiveForce g pos w h tweak
     adisp = attractiveForce g pos w h tweak
-
-getAllPositions ::
-  (Floating a, Ord a) =>
-    Graph.Graph -> Int -> Int -> Int -> a -> IO [[(a, a)]]
-getAllPositions g w l i t = do
-  rand <- randomPos (length $ Graph.vertices g) w l
-  initPos <- mapM (\(x,y) -> return (fromIntegral x, fromIntegral y)) rand
-  return $ allPositions g initPos w l i t
 
 data GraphAnimation a = GraphAnimation {
       graph :: Graph.Graph
