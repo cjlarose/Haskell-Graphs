@@ -13,4 +13,4 @@ all: $(EXECUTABLES)
 
 .PHONY : clean
 clean:
-	/bin/rm -f *.hi *.o $(EXECUTABLES)
+	/bin/rm -f *.hi *.o $(EXECUTABLES) *.prof
