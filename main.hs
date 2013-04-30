@@ -11,6 +11,7 @@ import Control.Monad
 import Text.Printf
 import qualified Draw
 import qualified GraphGen
+import qualified GDraw (newGraphAnimation)
 
 -- -- -- -- -- -- -- -- -- --
 --   Command Line Parsing  --
@@ -60,7 +61,10 @@ main = do
     if (socFile flags) /= (socFile defaultOptions)
         then do putStrLn $ "SOCfile " ++ show (socFile flags)
         else putStrLn $ "NOT SOCfile"
-    Draw.createWindow g (width flags) (height flags) (iterations flags) (tweak flags)
+
+    ga <- GDraw.newGraphAnimation g (width flags) (height flags) (iterations flags) (tweak flags)
+    Draw.createWindow ga (width flags) (height flags)
+    {--Draw.createWindow g (width flags) (height flags) (iterations flags) (tweak flags)--}
 
 parse argv = case getOpt Permute options argv of
     (args,fs,[]) -> return (foldl (flip id) defaultOptions args, fs)
