@@ -17,21 +17,21 @@ import qualified Data.List as List
 import Data.Maybe (fromJust)
 import qualified Point
 
-kfun :: Floating a => Graph.Graph -> Int -> Int -> a -> a
-kfun g w l tweak = (sqrt (x/y)) * tweak
+kfun :: Floating a => Graph.Graph -> Int -> Int -> a -> Int -> a
+kfun g w l tweak len = (sqrt (x/y)) * tweak
   where
     x = fromIntegral (w*l)
-    y = fromIntegral (length (Graph.vertices g))
+    y = fromIntegral len
 
-fa :: Floating a => Graph.Graph -> Int -> Int -> a -> a -> a
-fa g w l z tweak = (z^2) / k
+fa :: Floating a => Graph.Graph -> Int -> Int -> a -> a -> Int -> a
+fa g w l z tweak len = (z^2) / k
   where
-    k = kfun g w l tweak
+    k = kfun g w l tweak len
 
-fr :: Floating a => Graph.Graph -> Int -> Int -> a -> a -> a
-fr g w l z tweak = (k^2) / z
+fr :: Floating a => Graph.Graph -> Int -> Int -> a -> a -> Int ->a
+fr g w l z tweak len = (k^2) / z
   where
-    k = kfun g w l tweak
+    k = kfun g w l tweak len
 
 disp' f vpos upos = Point.scale ((f norm) / norm) delta
   where
@@ -44,7 +44,7 @@ repulsiveForce g ps w l tweak = map disp vs
   where
     vs = zip (Graph.vertices g) ps
     disp (v,vpos) = Point.sum [disp' f vpos upos | (u,upos) <- vs, u /= v]
-    f norm = fr g w l norm tweak
+    f norm = fr g w l norm tweak (length (Graph.vertices g))
 
 edgeMap g = Map.fromListWith (++) edge_list
   where
@@ -66,7 +66,7 @@ attractiveForce g ps w l tweak = map disp vs
     adjacentFrom v = adjacent v e
     adjacentTo v = adjacent v e'
     disp v = Point.sub (sumv adjacentTo v) (sumv adjacentFrom v)
-    f norm = fa g w l norm tweak
+    f norm = fa g w l norm tweak (length (Graph.vertices g))
     sumv fn (v,vpos) = Point.sum [disp' f vpos upos | (u,upos) <- fn v]
 
 gravity :: (Ord a, Floating a) => Graph.Graph -> [(a,a)] -> Int -> Int -> a -> [(a,a)]
@@ -75,7 +75,7 @@ gravity g ps w l tweak = map disp vs
     vs = zip (Graph.vertices g) ps
     {--disp (v,(x,y)) = (x / 2, y / 2)--}
     disp (v,vpos) = disp' f (0,0) vpos
-    f norm = fa g w l norm tweak
+    f norm = fa g w l norm tweak (length (Graph.vertices g))
     sqrp (x, y) = ((signum x) * x^2, (signum y) * y^2)
     {--sqrtp (x,y) = (sqrt' x, sqrt' y)
     sqrt' x
