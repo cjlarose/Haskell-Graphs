@@ -1,5 +1,6 @@
 module GraphDraw (
     createWindow,
+    sierpinskiTriangle,
 ) where
 
 import Data.Maybe (isJust, fromJust)
@@ -17,26 +18,25 @@ import qualified Point (round, add)
 -- -- -- -- -- -- -- -- -- --
 
 createWindow :: (RealFrac a, Show a, Floating a, Ord a) =>
-    GraphAnimation a -> Int -> Int -> Int64 -> IO ()
-createWindow ga w h delayms = do
+    GraphAnimation a -> Int -> Int -> Int64 -> Color -> Color -> IO ()
+createWindow ga w h delayms nodeColor edgeColor = do
     win <- openWindow "Chris and Roey's Zany Graph Drawing Window" (w, h)
     let center = (w `div` 2, h `div` 2)
-    drawGraph win ga center (Delay.msDelay delayms)
+    drawGraph win ga center (Delay.msDelay delayms) nodeColor edgeColor
     onClose win
         where center = (w `div` 2, h `div` 2)
 
 drawGraph :: (RealFrac a, Show a, Floating a, Ord a) =>
-    Window -> GraphAnimation a -> (Int, Int) -> Delay.Delay -> IO ()
-drawGraph w ga center delay = do
+    Window -> GraphAnimation a -> (Int, Int) -> Delay.Delay -> Color -> Color -> IO ()
+drawGraph w ga center delay nodeColor edgeColor = do
     putStrLn (show (positions ga))
-    let frame = createFrame center (graph ga) (positions ga)
+    let frame = createFrame center (graph ga) (positions ga) nodeColor edgeColor
     let graphic = overGraphics frame
     let newGraph = getNextGraph ga
     setGraphic w graphic
     if (isJust newGraph)
-        then
-            Timer.oneShotTimer
-                (drawGraph w (fromJust newGraph) center delay) delay
+        then Timer.oneShotTimer
+                (drawGraph w (fromJust newGraph) center delay nodeColor edgeColor) delay
             >> return ()
         else return ()
     return ()
@@ -54,11 +54,11 @@ onClose w = do
 -- -- -- -- -- -- -- -- -- --
 
 createFrame :: (RealFrac a) =>
-        (Int, Int) -> Graph.Graph -> [(a, a)] -> [Graphic]
-createFrame center g list = circles ++ lines
+        (Int, Int) -> Graph.Graph -> [(a, a)] -> Color -> Color -> [Graphic]
+createFrame center g list nodeColor edgeColor = circles ++ lines
     where
-        circles = map (\x -> createCircle x) list
-        lines   = getLineGraphics center g list
+        circles = map (\x -> withColor nodeColor (createCircle x)) list
+        lines   = getLineGraphics center g list edgeColor
         createCircle point = SOE.ellipse upperLeft lowerRight
             where upperLeft = Point.add center (x - r, y - r)
                   lowerRight = Point.add center (x + r, y + r)
@@ -70,9 +70,39 @@ createFrame center g list = circles ++ lines
 -- -- -- -- -- -- -- -- -- --
 
 getLineGraphics :: (RealFrac a) =>
-        (Int, Int) -> Graph.Graph -> [(a, a)] -> [Graphic]
-getLineGraphics center g ps = map b (map f (Graph.edges g))
-    where f (u,v) = (ps !! u, ps !! v)
-          b (p1, p2) = SOE.line
-                (Point.add center $ Point.round p1)
-                (Point.add center $ Point.round p2)
+        (Int, Int) -> Graph.Graph -> [(a, a)] -> Color -> [Graphic]
+getLineGraphics center g ps color =
+    map b (map f (Graph.edges g))
+        where f (u,v) = (ps !! u, ps !! v)
+              b (p1, p2) = (withColor color $ line
+                    (Point.add center $ Point.round p1)
+                    (Point.add center $ Point.round p2))
+
+-- -- -- -- -- -- -- -- -- --
+--     Messing Around      --
+-- -- -- -- -- -- -- -- -- --
+
+sierpinskiTriangle w h color =
+    runGraphics (
+        do openWindow "Sierpinski's Triangle" (w, h)
+            >>= \win ->
+            sierpinskiTri win 50 300 512 color
+            >> onClose win
+        )
+
+fillTri :: Window -> Int -> Int -> Int -> Color -> IO ()
+fillTri w x y size color
+    = drawInWindow w (withColor color
+        (polygon [(x,y), (x + size, y), (x, y - size), (x, y)]))
+
+minSize :: Int
+minSize = 2
+
+sierpinskiTri :: Window -> Int -> Int -> Int -> Color -> IO ()
+sierpinskiTri w x y size color
+    = if size <= minSize
+        then fillTri w x y size color
+        else let size2 = size `div` 2
+            in do sierpinskiTri w x y size2 color
+                  sierpinskiTri w x (y - size2) size2 color
+                  sierpinskiTri w (x + size2) y size2 color
