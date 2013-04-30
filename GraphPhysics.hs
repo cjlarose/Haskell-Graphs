@@ -111,7 +111,7 @@ randomPos p w l = do
     seed2 <- Random.newStdGen
     let l1 = randomList p seed1
     let l2 = randomList p seed2
-    let ps = zipWith (\x y -> ((x `mod` w) - (w `div` 2), (y `mod` l) - (l `div` 2))) l1 l2
+    let ps = zipWith (\x y -> ((x `mod` (2*w)) - w, (y `mod` (2*l)) - l)) l1 l2
     return ps
 
 {--temperatures :: (Floating a) => a -> Int -> [a]
