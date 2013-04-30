@@ -3,24 +3,33 @@ module Draw (
 ) where
 
 import SOE
-import GDraw (getAllPositions)
+import GDraw (GraphAnimation, getNextGraph, width, height)
 import Graphics.UI.GLFW (terminate)
 import qualified Point (round)
 import qualified Data.Graph as Graph
+import Data.Maybe (isJust, fromJust)
 
 -- -- -- -- -- -- -- -- -- --
 --     Window Creation     --
 -- -- -- -- -- -- -- -- -- --
 
 -- g w h i t <=> graph width height iterations tweak
-createWindow ::
+{--createWindow ::
     (RealFrac a, Floating a, Ord a) =>
-        Graph.Graph -> Int -> Int -> Int -> a -> IO ()
-createWindow g w h i t = do
-    position <- fmap (\x -> createFrame g $ head x) (getAllPositions g w h i t)
-    win <- openWindow "Chris and Roey's Zany Graph Drawing Window" (w, h)
-    mapM_ (drawInWindow win) position
+        Graph.Graph -> Int -> Int -> Int -> a -> IO ()--}
+createWindow :: GraphAnimation a -> IO ()
+createWindow ga = do
+    win <- openWindow "Chris and Roey's Zany Graph Drawing Window" (width ga, height ga)
+    drawGraph ga
     onClose win
+
+drawGraph :: GraphAnimation a -> IO ()
+drawGraph ga = do
+    let newGraph = getNextGraph ga
+    if (isJust newGraph)
+        then drawGraph (fromJust newGraph)
+        else return ()
+    return ()
 
 onClose :: Window -> IO ()
 onClose w = do

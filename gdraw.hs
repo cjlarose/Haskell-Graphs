@@ -2,7 +2,9 @@ module GDraw (
     repulsiveForce,
     attractiveForce,
     positionNodes,
-    getAllPositions
+    getAllPositions,
+    GraphAnimation(..),
+    getNextGraph,
 ) where
 import qualified Data.Graph as Graph
 import qualified Data.Map as Map
@@ -106,3 +108,15 @@ getAllPositions g w l i t = do
   rand <- randomPos (length $ Graph.vertices g) w l
   initPos <- mapM (\(x,y) -> return (fromIntegral x, fromIntegral y)) rand
   return $ allPositions g initPos w l i t
+
+data GraphAnimation a = GraphAnimation {
+      graph :: Graph.Graph
+    , width :: Int
+    , height :: Int
+    , iterations :: Int
+    , tweak :: a
+    , positions :: Maybe [(a,a)]
+}
+
+getNextGraph :: GraphAnimation a -> Maybe (GraphAnimation a)
+getNextGraph ga = Just (GraphAnimation (graph ga) (width ga) (height ga) (iterations ga) (tweak ga) (positions ga))
