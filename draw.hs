@@ -4,7 +4,8 @@ module Draw (
 
 import Data.Maybe (isJust, fromJust)
 import qualified Data.Graph as Graph
-import qualified Control.Concurrent as Concurrent (threadDelay)
+import qualified Control.Concurrent.Timer as Timer (oneShotTimer)
+import qualified Control.Concurrent.Suspend.Lifted as Delay (msDelay)
 import Graphics.UI.GLFW (terminate)
 import SOE
 import GDraw (newGraphAnimation, getNextGraph, GraphAnimation, graph, positions)
@@ -26,15 +27,16 @@ createWindow ga w h = do
 
 drawGraph :: (RealFrac a, Show a, Floating a, Ord a) => Window -> GraphAnimation a -> IO ()
 drawGraph w ga = do
-    let frame = createFrame (graph ga) (positions ga)
     putStrLn (show (positions ga))
-    mapM_ (drawInWindow w) frame
-    Concurrent.threadDelay 5000000
+    let frame = createFrame (graph ga) (positions ga)
+    let graphic = overGraphics frame
+    setGraphic w graphic
+    {--mapM_ (drawInWindow w) frame--}
     let newGraph = getNextGraph ga
     if (isJust newGraph)
         then 
-            clearWindow w
-            >> drawGraph w (fromJust newGraph)
+            Timer.oneShotTimer (drawGraph w (fromJust newGraph)) (Delay.msDelay 500)
+            >> return ()
         else return ()
     return ()
 
