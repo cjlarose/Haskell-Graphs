@@ -16,7 +16,7 @@ cabal install split
 cabal install suspend
 cabal install timers
 make
-./main -h
+./main -g cycle -d 30 -n 100 -i 120 --edgeColor Magenta --nodeColor Yellow -C 2.0
 ```
 
 Options
