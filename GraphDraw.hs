@@ -30,7 +30,7 @@ createWindow ga w h delayms nodeColor edgeColor = do
 drawGraph :: (RealFrac a, Show a, Floating a, Ord a) =>
     Window -> GraphAnimation a -> (Int, Int) -> Delay.Delay -> Color -> Color -> Bool -> IO ()
 drawGraph w ga center delay nodeColor edgeColor skip = do
-    putStrLn (show (positions ga))
+    {--putStrLn (show (positions ga))--}
     let frame = createFrame center (graph ga) (positions ga) nodeColor edgeColor
     let graphic = overGraphics frame
     let newGraph = getNextGraph ga
