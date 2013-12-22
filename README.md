@@ -56,7 +56,3 @@ Options
                                              star
                                              complete
                                              tree
-
-License
--------
-FILES NOT FOR INDIVIDUAL RESALE
